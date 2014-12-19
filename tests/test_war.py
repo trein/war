@@ -1,13 +1,15 @@
-import war
+import sys
 import logging
+sys.path.insert(0, '../war')
+import war
 
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
 
-class RangeProcessor(war.ChunkProcesssor):
+class CounterProcessor(war.ChunkProcesssor):
     def process_chunk(self, core, chunk):
-        for i in range(core):
-            yield i
+        for i in chunk:
+            yield i + 1
 
 
 class LineProcessor(war.ChunkProcesssor):
@@ -16,12 +18,10 @@ class LineProcessor(war.ChunkProcesssor):
             yield 'cu' + line.strip() + 'cu'
 
 
-dispatcher = war.TaskDispatcher()
+task = war.InMemoryTask(CounterProcessor(), range(100), 4)
+war.run(task)
+print 'Results:', task.outputs()
 
-task = war.InMemoryTask(RangeProcessor(), range(100), 4)
-dispatcher.run(task)
-print task.outputs()
-
-task = war.FSTask(LineProcessor(), 'test.csv', 4)
-dispatcher.run(task)
-print task.outputs()
+task = war.FSTask(LineProcessor(), 'tests/test.csv', 4)
+war.run(task)
+print 'Results:', task.outputs()

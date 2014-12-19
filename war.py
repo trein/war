@@ -5,6 +5,11 @@ import multiprocessing
 logger = logging.getLogger('war')
 
 
+def run(task):
+    dispatcher = TaskDispatcher()
+    dispatcher.run(task)
+
+
 class ChunkProcesssor(object):
     def process_chunk(self, core, chunk):
         raise NotImplementedError('method should be implemented by subclasses')
