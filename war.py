@@ -5,10 +5,12 @@ import multiprocessing
 logger = logging.getLogger('war')
 
 
-class Task(object):
-    def _process_chunk(self, core, chunk):
+class ChunkProcesssor(object):
+    def process_chunk(self, core, chunk):
         raise NotImplementedError('method should be implemented by subclasses')
 
+
+class Task(object):
     def outputs(self):
         raise NotImplementedError('method should be implemented by subclasses')
 
@@ -29,13 +31,11 @@ class Task(object):
 
 
 class InMemoryTask(Task):
-    def __init__(self, iterable, partitions):
+    def __init__(self, processor, iterable, partitions):
+        self._processor = processor
         self._chunks = self._grouper(iterable, partitions)
         self._partitions = partitions
         self._outputs = []
-
-    def _process_chunk(self, core, chunk):
-        raise NotImplementedError('method should be implemented by subclasses')
 
     def _grouper(self, iterable, partitions):
         chunks = []
@@ -66,7 +66,7 @@ class InMemoryTask(Task):
 
     def process(self, core, chunk, job_result):
         results = []
-        for entry in self._process_chunk(core, chunk):
+        for entry in self._processor.process_chunk(core, chunk):
             results.append(entry)
         job_result[core] = results
 
@@ -82,14 +82,12 @@ class InMemoryTask(Task):
 
 
 class FSTask(Task):
-    def __init__(self, filename, partitions):
+    def __init__(self, processor, filename, partitions):
+        self._processor = processor
         self._input_filename = filename
         self._output_filename = filename + '.out'
         self._partitions = partitions
         self._in_chunk_filenames, self._out_chunk_filenames = self._create_chunks(filename, partitions)
-
-    def _process_chunk(self, core, chunk):
-        raise NotImplementedError('method should be implemented by subclasses')
 
     def _create_chunks(self, filename, partitions):
         base_chuck_filename = filename + '.part'
@@ -115,7 +113,7 @@ class FSTask(Task):
     def process(self, core, input_chunk_filename, job_result):
         output_chunk_filename = self._out_chunk_filenames[core]
         with open(input_chunk_filename, 'r') as in_chunk, open(output_chunk_filename, 'w') as out_chunk:
-            for entry in self._process_chunk(core, in_chunk):
+            for entry in self._processor.process_chunk(core, in_chunk):
                 out_chunk.write(entry + '\n')
         job_result[core] = output_chunk_filename
 
