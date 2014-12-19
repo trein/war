@@ -15,7 +15,7 @@ class CounterProcessor(war.ChunkProcesssor):
 class LineProcessor(war.ChunkProcesssor):
     def process_chunk(self, core, chunk):
         for line in chunk:
-            yield 'cu' + line.strip() + 'cu'
+            yield 'cu' + line.strip() + 'cu\n'
 
 
 task = war.InMemoryTask(CounterProcessor(), range(100), 4)

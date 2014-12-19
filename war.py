@@ -119,7 +119,7 @@ class FSTask(Task):
         output_chunk_filename = self._out_chunk_filenames[core]
         with open(input_chunk_filename, 'r') as in_chunk, open(output_chunk_filename, 'w') as out_chunk:
             for entry in self._processor.process_chunk(core, in_chunk):
-                out_chunk.write(entry + '\n')
+                out_chunk.write(entry)
         job_result[core] = output_chunk_filename
 
     def process_output(self, results):
