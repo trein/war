@@ -43,6 +43,12 @@ class InMemoryTask(Task):
         self._outputs = []
 
     def _grouper(self, iterable, partitions):
+        if not partitions:
+            raise Exception('partitions should be greater than 0')
+
+        if not iterable:
+            raise Exception('empty iterable')
+
         chunks = []
         chunk_size = float(len(iterable)) / float(partitions) + 1e-6
 
