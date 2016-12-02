@@ -15,7 +15,7 @@ class CounterProcessor(war.ChunkProcesssor):
 
 cores = 4
 huge_input_list = range(1000000)
-task = war.InMemoryTask(RangeProcessor(), huge_input_list, cores)
+task = war.InMemoryTask(CounterProcessor(), huge_input_list, cores)
 
 war.run(task)
 
